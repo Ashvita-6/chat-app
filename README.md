@@ -1,6 +1,6 @@
 # 🚀 Real-Time Full-Stack Chat Application
 
-A slick, fully-loaded chat app — packed with real-time messaging, secure auth, image uploads, and a sleek multi-theme UI. 
+A slick, fully-loaded chat app — packed with real-time messaging, secure auth, image uploads, and a sleek UI. 
 
 ---
 
@@ -11,7 +11,7 @@ A real-time chat app with a focus on security, performance, and user experience.
 - **Secure Authentication:** Implemented JWT-based login with bcrypt password hashing to keep user data safe.
 - **Real-Time Communication:** Powered by Socket.IO, enabling instant messaging and live online presence updates.
 - **Rich Media Support:** Integrated Cloudinary for efficient image upload and delivery.
-- **Modern Frontend:** Built with React, styled using Tailwind CSS and Daisy UI, with 32 customizable themes and fully responsive design.
+- **Modern Frontend:** Built with React, styled using Tailwind CSS and Daisy UI , the app has a full responsive design.
 - **Global State Management:** Used Zustand for clean and efficient handling of app state.
 - **Backend:** Node.js, Express, and MongoDB for RESTful API and data storage.
 - **Deployment:** Served React frontend statically through Express backend, deployed as a single domain app for simplicity and reliability.
