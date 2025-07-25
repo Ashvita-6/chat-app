@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
-import { LogOut, MessageSquare, Settings, User } from "lucide-react";
+import { LogOut, MessageSquare, Settings, User, CheckSquare } from "lucide-react";
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
@@ -22,20 +22,17 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* <Link
-              to={"/settings"}
-              className={`
-              btn btn-sm gap-2 transition-colors
-              
-              `}
-            >
-              <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline">Settings</span>
-            </Link> */}
-
             {authUser && (
               <>
-                <Link to={"/profile"} className={`btn btn-sm gap-2`}>
+                <Link
+                  to="/tasks"
+                  className="btn btn-sm gap-2 transition-colors hover:bg-primary/10"
+                >
+                  <CheckSquare className="w-4 h-4" />
+                  <span className="hidden sm:inline">Task Allocation</span>
+                </Link>
+
+                <Link to="/profile" className="btn btn-sm gap-2">
                   <User className="size-5" />
                   <span className="hidden sm:inline">Profile</span>
                 </Link>
@@ -52,4 +49,5 @@ const Navbar = () => {
     </header>
   );
 };
+
 export default Navbar;
