@@ -6,6 +6,7 @@ import LoginPage from "./pages/LoginPage";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
 import TaskAllocationPage from "./pages/TaskAllocationPage";
+import MyTasksPage from "./pages/MyTasksPage";
 
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore.js";
@@ -45,6 +46,7 @@ const App = () => {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
         <Route path="/tasks" element={authUser ? <TaskAllocationPage /> : <Navigate to="/login" />} />
+        <Route path="/my-tasks" element={authUser ? <MyTasksPage /> : <Navigate to="/login" />} />
       </Routes>
 
       <Toaster />

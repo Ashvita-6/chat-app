@@ -10,8 +10,21 @@ import {
   AlertCircle,
   Tag
 } from "lucide-react";
+import { useAuthStore } from "../../store/useAuthStore";
 
-const TaskCard = ({ task, onUpdate, onDelete, getPriorityColor, getStatusColor, onClick }) => {
+const TaskCard = ({ 
+  task, 
+  onUpdate, 
+  onDelete, 
+  onEdit,
+  getPriorityColor, 
+  getStatusColor, 
+  onClick,
+  isReadOnly = false,
+  hideEditButton = false,
+  hideDeleteButton = false
+}) => {
+  const { authUser } = useAuthStore();
   const [showActions, setShowActions] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -33,6 +46,8 @@ const TaskCard = ({ task, onUpdate, onDelete, getPriorityColor, getStatusColor, 
   };
 
   const handleStatusChange = async (newStatus) => {
+    if (!onUpdate) return;
+    
     setIsUpdating(true);
     try {
       await onUpdate(task._id, { status: newStatus });
@@ -44,14 +59,38 @@ const TaskCard = ({ task, onUpdate, onDelete, getPriorityColor, getStatusColor, 
   };
 
   const handleDelete = () => {
+    if (!onDelete) return;
+    
     if (window.confirm("Are you sure you want to delete this task?")) {
       onDelete(task._id);
     }
   };
 
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit(task);
+    }
+  };
+
+  // Check if current user can edit this task (only task creator can edit)
+  const canEdit = authUser && task.assignedBy && task.assignedBy._id === authUser._id && onEdit;
+  
+  // Check if current user can delete this task (only task creator can delete)
+  const canDelete = authUser && task.assignedBy && task.assignedBy._id === authUser._id && onDelete;
+
+  // Check if current user can update status (assigned users can update status)
+  const canUpdateStatus = authUser && onUpdate && (
+    (task.assignedBy && task.assignedBy._id === authUser._id) || 
+    (task.assignedTo && task.assignedTo.some(user => user._id === authUser._id))
+  );
+
   const daysUntilDue = getDaysUntilDue(task.dueDate);
   const isOverdue = daysUntilDue < 0;
   const isDueSoon = daysUntilDue <= 3 && daysUntilDue >= 0;
+
+  // Handle missing or undefined task properties safely
+  const taskTags = task.tags || [];
+  const taskAssignedTo = task.assignedTo || [];
 
   return (
     <div 
@@ -76,51 +115,60 @@ const TaskCard = ({ task, onUpdate, onDelete, getPriorityColor, getStatusColor, 
               {task.priority}
             </span>
             
-            {/* Actions Dropdown */}
-            <div className="dropdown dropdown-end">
-              <button
-                tabIndex={0}
-                className="btn btn-ghost btn-sm btn-circle"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowActions(!showActions);
-                }}
-              >
-                <MoreVertical className="w-4 h-4" />
-              </button>
-              <ul className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-40">
-                <li>
-                  <button 
-                    className="flex items-center gap-2"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Edit className="w-4 h-4" />
-                    Edit Task
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    className="flex items-center gap-2 text-error"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete();
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete
-                  </button>
-                </li>
-              </ul>
-            </div>
+            {/* Actions Dropdown - Only show if user has permissions */}
+            {(canEdit || canDelete) && !hideEditButton && !hideDeleteButton && (
+              <div className="dropdown dropdown-end">
+                <button
+                  tabIndex={0}
+                  className="btn btn-ghost btn-sm btn-circle"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowActions(!showActions);
+                  }}
+                >
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+                <ul className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-40">
+                  {canEdit && !hideEditButton && (
+                    <li>
+                      <button 
+                        className="flex items-center gap-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit();
+                        }}
+                      >
+                        <Edit className="w-4 h-4" />
+                        Edit Task
+                      </button>
+                    </li>
+                  )}
+                  {canDelete && !hideDeleteButton && (
+                    <li>
+                      <button 
+                        className="flex items-center gap-2 text-error"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete();
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </button>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Tags */}
-        {task.tags && task.tags.length > 0 && (
+        {taskTags.length > 0 && (
           <div className="flex items-center gap-2 mb-3">
             <Tag className="w-4 h-4 text-base-content/50" />
             <div className="flex flex-wrap gap-1">
-              {task.tags.slice(0, 2).map((tag, index) => (
+              {taskTags.slice(0, 2).map((tag, index) => (
                 <span
                   key={index}
                   className="badge badge-outline badge-sm"
@@ -128,9 +176,9 @@ const TaskCard = ({ task, onUpdate, onDelete, getPriorityColor, getStatusColor, 
                   {tag}
                 </span>
               ))}
-              {task.tags.length > 2 && (
+              {taskTags.length > 2 && (
                 <span className="badge badge-outline badge-sm">
-                  +{task.tags.length - 2}
+                  +{taskTags.length - 2}
                 </span>
               )}
             </div>
@@ -158,37 +206,83 @@ const TaskCard = ({ task, onUpdate, onDelete, getPriorityColor, getStatusColor, 
         <div className="flex items-center gap-2 mb-4">
           <span className="text-sm text-base-content/70">Assigned:</span>
           <div className="flex items-center gap-1">
-            {task.assignedTo.slice(0, 3).map((user) => (
+            {taskAssignedTo.slice(0, 3).map((user) => (
               <div key={user._id} className="avatar">
                 <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
                   {user.profilePic ? (
                     <img src={user.profilePic} alt={user.fullName} className="w-full h-full rounded-full" />
                   ) : (
                     <span className="text-xs font-medium text-primary">
-                      {user.fullName.charAt(0).toUpperCase()}
+                      {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
                     </span>
                   )}
                 </div>
               </div>
             ))}
-            {task.assignedTo.length > 3 && (
+            {taskAssignedTo.length > 3 && (
               <div className="w-6 h-6 rounded-full bg-base-300 flex items-center justify-center">
-                <span className="text-xs font-medium">+{task.assignedTo.length - 3}</span>
+                <span className="text-xs font-medium">+{taskAssignedTo.length - 3}</span>
               </div>
             )}
           </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-auto flex items-center justify-between">
-          <span className={`badge ${getStatusColor(task.status)} badge-sm`}>
-            {task.status.charAt(0).toUpperCase() + task.status.slice(1).replace('-', ' ')}
-          </span>
-          
-          {isOverdue && (
-            <div className="flex items-center gap-1 text-error text-xs">
-              <AlertCircle className="w-3 h-3" />
-              <span>Overdue</span>
+        <div className="mt-auto">
+          {/* Status */}
+          <div className="flex items-center justify-between mb-3">
+            <span className={`badge ${getStatusColor(task.status)} badge-sm`}>
+              {task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1).replace('-', ' ') : 'Unknown'}
+            </span>
+            
+            {isOverdue && (
+              <div className="flex items-center gap-1 text-error text-xs">
+                <AlertCircle className="w-3 h-3" />
+                <span>Overdue</span>
+              </div>
+            )}
+          </div>
+
+          {/* Quick Status Updates - Only show if user can update status */}
+          {canUpdateStatus && !isReadOnly && (
+            <div className="flex gap-1 flex-wrap">
+              {task.status !== 'pending' && (
+                <button
+                  className="btn btn-xs btn-ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStatusChange('pending');
+                  }}
+                  disabled={isUpdating}
+                >
+                  Mark Pending
+                </button>
+              )}
+              {task.status !== 'in-progress' && (
+                <button
+                  className="btn btn-xs btn-ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStatusChange('in-progress');
+                  }}
+                  disabled={isUpdating}
+                >
+                  Start Progress
+                </button>
+              )}
+              {task.status !== 'completed' && (
+                <button
+                  className="btn btn-xs btn-success"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStatusChange('completed');
+                  }}
+                  disabled={isUpdating}
+                >
+                  <CheckSquare className="w-3 h-3 mr-1" />
+                  Complete
+                </button>
+              )}
             </div>
           )}
         </div>

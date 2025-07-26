@@ -4,6 +4,7 @@ import TaskComment from "../models/taskComment.model.js";
 import User from "../models/user.model.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
 import cloudinary from "../lib/cloudinary.js";
+import { getChatUsers, areUsersInChatList, getChatUsersForTaskAssignment } from "../utils/chatUtils.js";
 
 // Get all tasks with advanced filtering and pagination
 export const getTasks = async (req, res) => {
@@ -235,6 +236,15 @@ export const createTask = async (req, res) => {
       });
     }
 
+    // Check if all assigned users are in the current user's chat list
+    const areInChatList = await areUsersInChatList(req.user._id, assignedTo);
+    if (!areInChatList) {
+      return res.status(400).json({
+        success: false,
+        message: "You can only assign tasks to people you have chatted with"
+      });
+    }
+
     // Validate assigned users exist
     const users = await User.find({ _id: { $in: assignedTo } });
     if (users.length !== assignedTo.length) {
@@ -328,6 +338,15 @@ export const updateTask = async (req, res) => {
         return res.status(400).json({
           success: false,
           message: "At least one person must be assigned"
+        });
+      }
+
+      // Check if all assigned users are in the current user's chat list
+      const areInChatList = await areUsersInChatList(req.user._id, updates.assignedTo);
+      if (!areInChatList) {
+        return res.status(400).json({
+          success: false,
+          message: "You can only assign tasks to people you have chatted with"
         });
       }
 
@@ -515,6 +534,15 @@ export const assignTask = async (req, res) => {
       });
     }
 
+    // Check if all users are in the current user's chat list
+    const areInChatList = await areUsersInChatList(req.user._id, userIds);
+    if (!areInChatList) {
+      return res.status(400).json({
+        success: false,
+        message: "You can only assign tasks to people you have chatted with"
+      });
+    }
+
     // Validate users exist
     const users = await User.find({ _id: { $in: userIds } });
     if (users.length !== userIds.length) {
@@ -569,6 +597,26 @@ export const getAvailableTags = async (req, res) => {
 
   } catch (error) {
     console.error("Error in getAvailableTags:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Internal server error" 
+    });
+  }
+};
+
+// Get chat users for task assignment
+export const getChatUsersForTasks = async (req, res) => {
+  try {
+    const chatUsers = await getChatUsersForTaskAssignment(req.user._id);
+    
+    res.status(200).json({
+      success: true,
+      data: chatUsers,
+      message: "Chat users retrieved successfully"
+    });
+
+  } catch (error) {
+    console.error("Error in getChatUsersForTasks:", error);
     res.status(500).json({ 
       success: false, 
       message: "Internal server error" 

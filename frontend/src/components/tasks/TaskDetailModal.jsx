@@ -12,17 +12,22 @@ import {
   AlertCircle,
   MessageSquare
 } from "lucide-react";
+import { useAuthStore } from "../../store/useAuthStore";
 
 const TaskDetailModal = ({ 
   task, 
   onClose, 
   onUpdate, 
   onDelete, 
+  onEdit,
   getPriorityColor, 
-  getStatusColor 
+  getStatusColor,
+  hideEditButton = false,
+  hideDeleteButton = false,
+  isReadOnly = false
 }) => {
+  const { authUser } = useAuthStore();
   const [isUpdating, setIsUpdating] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -116,20 +121,24 @@ const TaskDetailModal = ({
 
           {/* Header Actions */}
           <div className="flex items-center gap-2 ml-4">
-            <button
-              className="btn btn-outline btn-sm gap-2"
-              onClick={() => setShowEditForm(true)}
-            >
-              <Edit className="w-4 h-4" />
-              Edit
-            </button>
-            <button
-              className="btn btn-error btn-outline btn-sm gap-2"
-              onClick={handleDelete}
-            >
-              <Trash2 className="w-4 h-4" />
-              Delete
-            </button>
+            {canEdit && (
+              <button
+                className="btn btn-outline btn-sm gap-2"
+                onClick={handleEdit}
+              >
+                <Edit className="w-4 h-4" />
+                Edit
+              </button>
+            )}
+            {canDelete && (
+              <button
+                className="btn btn-error btn-outline btn-sm gap-2"
+                onClick={handleDelete}
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+            )}
             <button
               onClick={onClose}
               className="btn btn-ghost btn-sm btn-circle"
@@ -173,36 +182,42 @@ const TaskDetailModal = ({
               {/* Status Actions */}
               <div>
                 <h3 className="text-lg font-semibold text-base-content mb-3">Quick Actions</h3>
-                <div className="flex flex-wrap gap-2">
-                  {task.status !== 'pending' && (
-                    <button
-                      className="btn btn-outline btn-sm"
-                      onClick={() => handleStatusChange('pending')}
-                      disabled={isUpdating}
-                    >
-                      Mark as Pending
-                    </button>
-                  )}
-                  {task.status !== 'in-progress' && (
-                    <button
-                      className="btn btn-info btn-sm"
-                      onClick={() => handleStatusChange('in-progress')}
-                      disabled={isUpdating}
-                    >
-                      Start Progress
-                    </button>
-                  )}
-                  {task.status !== 'completed' && (
-                    <button
-                      className="btn btn-success btn-sm gap-2"
-                      onClick={() => handleStatusChange('completed')}
-                      disabled={isUpdating}
-                    >
-                      <CheckSquare className="w-4 h-4" />
-                      Mark Complete
-                    </button>
-                  )}
-                </div>
+                {canUpdateStatus ? (
+                  <div className="flex flex-wrap gap-2">
+                    {task.status !== 'pending' && (
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => handleStatusChange('pending')}
+                        disabled={isUpdating}
+                      >
+                        Mark as Pending
+                      </button>
+                    )}
+                    {task.status !== 'in-progress' && (
+                      <button
+                        className="btn btn-info btn-sm"
+                        onClick={() => handleStatusChange('in-progress')}
+                        disabled={isUpdating}
+                      >
+                        Start Progress
+                      </button>
+                    )}
+                    {task.status !== 'completed' && (
+                      <button
+                        className="btn btn-success btn-sm gap-2"
+                        onClick={() => handleStatusChange('completed')}
+                        disabled={isUpdating}
+                      >
+                        <CheckSquare className="w-4 h-4" />
+                        Mark Complete
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-base-content/50 text-sm">
+                    You can only view this task
+                  </div>
+                )}
               </div>
 
               {/* Comments Section (Placeholder) */}

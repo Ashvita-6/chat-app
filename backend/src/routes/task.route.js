@@ -10,7 +10,8 @@ import {
   deleteTask,
   getUserTasks,
   assignTask,
-  getAvailableTags
+  getAvailableTags,
+  getChatUsersForTasks
 } from "../controllers/task.controller.js";
 import {
   getTaskComments,
@@ -24,6 +25,7 @@ const router = express.Router();
 // Task routes
 router.get("/", protectRoute, getTasks);
 router.get("/tags", protectRoute, getAvailableTags);
+router.get("/chat-users", protectRoute, getChatUsersForTasks);
 router.get("/:taskId", protectRoute, getTask);
 router.get("/user/:userId", protectRoute, getUserTasks);
 

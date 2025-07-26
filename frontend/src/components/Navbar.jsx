@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
-import { LogOut, MessageSquare, Settings, User, CheckSquare } from "lucide-react";
+import { LogOut, MessageSquare, Settings, User, CheckSquare, ListTodo } from "lucide-react";
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
@@ -30,6 +30,14 @@ const Navbar = () => {
                 >
                   <CheckSquare className="w-4 h-4" />
                   <span className="hidden sm:inline">Task Allocation</span>
+                </Link>
+
+                <Link
+                  to="/my-tasks"
+                  className="btn btn-sm gap-2 transition-colors hover:bg-secondary/10"
+                >
+                  <ListTodo className="w-4 h-4" />
+                  <span className="hidden sm:inline">My Tasks</span>
                 </Link>
 
                 <Link to="/profile" className="btn btn-sm gap-2">
