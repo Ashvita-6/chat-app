@@ -1,4 +1,3 @@
-
 import { axiosInstance } from "../lib/axios";
 
 import { useState, useEffect } from "react";
@@ -277,7 +276,10 @@ const TaskAllocationPage = () => {
                   onEdit={handleEditTask}
                   getPriorityColor={getPriorityColor}
                   getStatusColor={getStatusColor}
-                  onClick={() => setSelectedTaskLocal(task)}
+                  onClick={(clickedTask) => {
+                    console.log("TaskCard clicked, task data:", clickedTask || task);
+                    setSelectedTaskLocal(clickedTask || task);
+                  }}
                 />
               ))}
             </div>
@@ -298,13 +300,31 @@ const TaskAllocationPage = () => {
       {selectedTask && (
         <TaskDetailModal
           task={selectedTask}
-          onClose={() => setSelectedTaskLocal(null)}
+          onClose={() => {
+            console.log("Closing task detail modal");
+            setSelectedTaskLocal(null);
+          }}
           onUpdate={handleUpdateTask}
           onDelete={handleDeleteTask}
           onEdit={handleEditTask}
           getPriorityColor={getPriorityColor}
           getStatusColor={getStatusColor}
         />
+      )}
+
+      {/* Debug info */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed bottom-4 right-4 bg-base-100 p-4 rounded-lg shadow-lg max-w-xs">
+          <p className="text-xs">
+            Selected Task: {selectedTask ? selectedTask.title || 'No title' : 'None'}
+          </p>
+          <p className="text-xs">
+            Total Tasks: {tasks.length}
+          </p>
+          <p className="text-xs">
+            Filtered Tasks: {filteredTasks.length}
+          </p>
+        </div>
       )}
     </div>
   );

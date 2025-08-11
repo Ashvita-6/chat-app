@@ -95,7 +95,10 @@ const TaskCard = ({
   return (
     <div 
       className="bg-base-100 rounded-lg border border-base-300 p-4 hover:shadow-md transition-all cursor-pointer hover:border-primary/30"
-      onClick={() => onClick && onClick()}
+      onClick={() => {
+        console.log("TaskCard clicked, task:", task);
+        if (onClick) onClick(task);
+      }}
     >
       <div className="flex flex-col h-full">
         {/* Header */}
