@@ -2,8 +2,16 @@ services:
   - type: web
     name: chat-app
     runtime: node
-    buildCommand: ./build.sh
-    startCommand: ./start.sh
+    rootDir: ./
+    buildCommand: |
+      echo "Building frontend..."
+      cd frontend
+      npm install
+      npm run build
+      echo "Installing backend dependencies..."
+      cd ../backend
+      npm install --production
+    startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
         value: production
