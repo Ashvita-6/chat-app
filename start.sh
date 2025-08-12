@@ -1,4 +1,9 @@
 #!/bin/bash
 
-# Navigate to backend directory and start the server
-cd backend && node src/index.js
+echo "==> Starting application..."
+
+# Navigate to backend directory
+cd backend
+
+# Start the server
+npm start
