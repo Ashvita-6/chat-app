@@ -1,19 +1,19 @@
 {
-  "name": "backend",
+  "name": "chat-app-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend for real-time chat application",
   "main": "src/index.js",
-  "scripts": {
-    "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
-  },
-  "keywords": [],
-  "author": "",
   "type": "module",
-  "license": "ISC",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "cloudinary": "^2.0.0",
+    "cloudinary": "^1.41.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
